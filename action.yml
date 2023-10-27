@@ -1,0 +1,20 @@
+name: 'Auditmation Policy Builder'
+description: 'Manages compliance policies and procedures as code using Markdown and YAML'
+inputs:
+  api-key:
+    description: 'Auditmation API key'
+    required: true
+  org-id:
+    description: 'Auditmation Org ID'
+    required: true
+  boundary-id:
+    description: 'Boundary ID, required if more than one boundary exists'
+    required: false
+    default: ''
+  url:
+    description: 'Auditmation Application URL'
+    required: true
+    default: 'https://nf.auditmation.io'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
