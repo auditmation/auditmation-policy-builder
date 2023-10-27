@@ -1,6 +1,6 @@
 {
   "name": "@auditmation/auditmation-policy-builder",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "GitHub action for uploading sbom files to Auditmation",
   "main": "index.js",
   "scripts": {
@@ -21,8 +21,8 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
-    "@auditmation/module-auditmation-auditmation-file-service": "^0.11.2",
-    "@auditmation/module-auditmation-auditmation-platform": "^2.5.5",
+    "@auditmation/module-auditmation-auditmation-file-service": "^1.0.1",
+    "@auditmation/module-auditmation-auditmation-platform": "^3.5.14",
     "@auditmation/types-core-js": "^4.0.5",
     "md5-file": "^5.0.0"
   },
