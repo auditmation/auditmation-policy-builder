@@ -7,6 +7,7 @@ const fs = require('fs');
 const md5File = require('md5-file');
 const path = require('path');
 const https = require('node:https');
+const args = {};
 
 process
   .on('unhandledRejection', (reason, p) => {
@@ -21,9 +22,8 @@ process
 async function run() {
 
   try {
-	let args = {};
-    args.operation = core.getInput('operation');
-    args.apiKey = core.getInput('api-key');
+    args,operation = core.getInput('operation');
+    args,apiKey = core.getInput('api-key');
     args.orgId = core.getInput('org-id');
     let url = await URL.parse(core.getInput('url'));
     const hostname = url.hostname.startsWith('api') ? url.hostname: `api.${url.hostname}`;
@@ -32,16 +32,16 @@ async function run() {
 
     const fileService = newFileService();
     await fileService.connect({
-      apiKey,
-      orgId,
-      url: await URL.parse(`${url.toString()}file-service`),
+		apiKey: args.apiKey,
+		orgId: args.orgId,
+        url: await URL.parse(`${url.toString()}file-service`),
     });
 
     const platform = newPlatform();
     await platform.connect({
-      apiKey,
-      orgId,
-      url: await URL.parse(`${url.toString()}platform`),
+		apiKey: args.apiKey,
+        orgId: args.orgId,
+        url: await URL.parse(`${url.toString()}platform`),
     });
 
     // Get or create boundary?
@@ -49,6 +49,7 @@ async function run() {
       const boundaries = await platform.getBoundaryApi().listBoundaries();
       args.boundaryId = boundaries.items[0].id;
     }
+	 
 	console.log(JSON.stringify(args));
 
   } catch (err) {
