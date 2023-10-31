@@ -1,6 +1,6 @@
 {
   "name": "@auditmation/auditmation-policy-builder",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "GitHub action for uploading sbom files to Auditmation",
   "main": "index.js",
   "scripts": {
