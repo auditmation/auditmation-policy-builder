@@ -11,6 +11,9 @@ inputs:
     description: 'Boundary ID, required if more than one boundary exists'
     required: false
     default: ''
+  operation:
+    description: 'The operation to execute'
+    required: true
   url:
     description: 'Auditmation Application URL'
     required: true

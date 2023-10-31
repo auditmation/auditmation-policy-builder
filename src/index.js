@@ -21,18 +21,14 @@ process
 async function run() {
 
   try {
-    const productId = core.getInput('product-id');
-    let pkgName = core.getInput('package');
-    const vIndex = pkgName.indexOf('@', 1);
-    let version = pkgName.substring(vIndex + 1);
-    pkgName = pkgName.substring(0, vIndex);
-    const filePath = core.getInput('file-path');
-    const apiKey = core.getInput('api-key');
-    const orgId = core.getInput('org-id');
+	let args = {};
+    args.operation = core.getInput('operation');
+    args.apiKey = core.getInput('api-key');
+    args.orgId = core.getInput('org-id');
     let url = await URL.parse(core.getInput('url'));
     const hostname = url.hostname.startsWith('api') ? url.hostname: `api.${url.hostname}`;
-    url = await URL.parse(`${url.protocol}://${hostname}`);
-    let boundaryId = core.getInput('boundary-id');
+    args.url = await URL.parse(`${url.protocol}://${hostname}`);
+    args.boundaryId = core.getInput('boundary-id');
 
     const fileService = newFileService();
     await fileService.connect({
@@ -49,11 +45,11 @@ async function run() {
     });
 
     // Get or create boundary?
-    if (!boundaryId) {
+    if (!args.boundaryId) {
       const boundaries = await platform.getBoundaryApi().listBoundaries();
-      boundaryId = boundaries.items[0].id;
+      args.boundaryId = boundaries.items[0].id;
     }
-    console.log('Using boundary:', boundaryId);
+	console.log(JSON.stringify(args));
 
   } catch (err) {
 
