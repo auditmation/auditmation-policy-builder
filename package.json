@@ -21,10 +21,13 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
+    "@auditmation/module-auditmation-auditmation-dana": "^5.2.0",
     "@auditmation/module-auditmation-auditmation-file-service": "^1.0.1",
     "@auditmation/module-auditmation-auditmation-platform": "^3.5.14",
     "@auditmation/types-core-js": "^4.0.5",
-    "md5-file": "^5.0.0"
+    "install": "^0.13.0",
+    "md5-file": "^5.0.0",
+    "npm": "^10.2.2"
   },
   "devDependencies": {
     "@actions/exec": "^1.1.1",
