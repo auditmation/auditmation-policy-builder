@@ -2,16 +2,14 @@ const exec = require('@actions/exec');
 const { expect } = require('chai');
 const path = require('path');
 
-describe('Auditmation SBOM Recorder Test', function () {
-  it('Should upload an sbom from an artifact', async () => {
+describe('Auditmation Policy Builder', function () {
+  it('Should an artifact', async () => {
     const env = {
       'INPUT_API-KEY': process.env.API_KEY,
       'INPUT_ORG-ID': process.env.ORG_ID,
-      'INPUT_BOUNDARY-ID': '4bfa191b-b40f-4c3e-8a3b-a15bb4f6448d',
-      INPUT_URL: process.env.URL,
-      'INPUT_PACKAGE': '@auditmation/file-service-app@latest',
-      'INPUT_FILE-PATH': 'bom.json',
-      'INPUT_PRODUCT-ID': '23cf2909-5c5e-5546-be5f-7f167d1f1c16',
+      'INPUT_BOUNDARY-ID': process.env.BOUNDARY_ID,
+      'INPUT_URL': process.env.API_URL,
+      'INPUT_OPERATION': 'load-controls',
       ...process.env,
     };
 
