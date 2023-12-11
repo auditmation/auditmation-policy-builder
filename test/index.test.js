@@ -12,7 +12,6 @@ describe('Auditmation Policy Builder', function () {
       'INPUT_OPERATION': 'load-controls',
       ...process.env,
     };
-
     const out = await exec.exec('node', [path.join(__dirname, '..', 'src', 'index.js')], { env });
     console.log('OUT', out);
     expect(out).to.equal(0);
