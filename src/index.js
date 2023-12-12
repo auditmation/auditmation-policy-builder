@@ -67,7 +67,6 @@ async function ensurePipeline() {
 		pipeline = await platform.getPipelineApi().update(pipeline.id, pipeline);
 	}
     console.log('Pipeline', pipeline);
-	return;
 }
 
 async function ensureFolder() {
@@ -212,7 +211,7 @@ async function loadPolicy( domainCode ) {
 		throw new Error( "Can't find evidence definition ID for " + domainCode );
 	}
 
-    const batchItem = await platform.getBatchApi().addBatchItem( batch.Id, {
+    const batchItem = await platform.getBatchApi().addBatchItem( batch.id, {
       payload: {
         id: file.id,
         name: file.name,
@@ -265,7 +264,6 @@ async function loadControl( c ) {
 	// load domain policy as needed
 	let domainCode = c.code.split("-")[0];
 	await loadPolicy( domainCode );
-	return;
 
 	let scfCode = toScf(c.code);
 
@@ -350,10 +348,14 @@ async function loadControls() {
 	let org = await orgApi.getOrg( args.orgId );
 	console.log( JSON.stringify(org, null, 3 ));
 	let ic = await platform.getInternalControlApi();
-	let results = await ic.slimList( args.boundaryId );
+	let results = await ic.slimList( args.boundaryId, 1, 1000 );
+	console.log( "Processing " + results.count + " controls" );
+	let controls_yaml = "controls:\n"
 	for await ( const control of results ) {
+		controls_yaml += " - " + control.code + "\n";
 		await loadControl( control );
 	}
+	console.log( controls_yaml );
 }
 
 async function run() {
@@ -420,12 +422,6 @@ async function run() {
 	// make sure folder exists
 	await ensureFolder();
 
-	if (args.operation === 'load-controls') {
-		await loadControls();
-	} else {
-		throw new Error("unsupported operation: " + args.operation);
-	}
-
     // load control standards & guidlines, and lazily upload policies
 	await loadControls();
 
@@ -436,6 +432,7 @@ async function run() {
     await platform.getPipelineJobApi().updatePipelineJob(jobId, {
       status: PipelineJobStatusEnum.Completed,
     });
+
 
   } catch (err) {
 
