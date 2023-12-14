@@ -3,6 +3,7 @@ const exec = require('@actions/exec');
 const { newDana } = require('@auditmation/module-auditmation-auditmation-dana');
 const { newFileService } = require('@auditmation/module-auditmation-auditmation-file-service');
 const { newPlatform, PipelineAdminStatusEnum, PipelineFormatEnum, PipelineJobStatusEnum } = require('@auditmation/module-auditmation-auditmation-platform');
+const { newEvents } = require('@auditmation/module-auditmation-auditmation-events');
 const { TimeZone, URL } = require('@auditmation/types-core-js');
 const fs = require('fs');
 const readline = require('readline');
@@ -12,6 +13,7 @@ const https = require('node:https');
 const args = {};
 const fileService = newFileService();
 const platform = newPlatform();
+const events = newEvents();
 const dana = newDana();
 const productId = "23cf2909-5c5e-5546-be5f-7f167d1f1c16"
 const domains = {};
@@ -146,11 +148,8 @@ async function loadPolicy( domainCode ) {
 
 	// get file metadata from fileservice
 	let file = fileMap[fileName];
-	if ( file ) {
-		if ( true || file.checksum === checksum ) {
-			console.log( "   > No changes since last run" );
-		}
-	} else {
+
+	if ( ! file ) {
 		file = await fileService.getFileApi().create({
 			name: fileName,
 			description: domainCode.toUpperCase() + " Policy",
@@ -158,7 +157,14 @@ async function loadPolicy( domainCode ) {
 			retentionPolicy: {},
 			syncPolicy: {},
 		});
+		console.log( "   > Created file record" );
+		console.log( JSON.stringify(file, null, 3) );
+	}
 
+	if ( file.fileVersionId && file.checksum === checksum ) {
+		console.log( "   > No changes since last run" );
+	} else {
+		console.log( "   > Uploading file content" );
 		// use node https since file upload is not in openapi (hack)
 		const opts = {
 			hostname: args.url.hostname,
@@ -173,8 +179,7 @@ async function loadPolicy( domainCode ) {
 			  'dana-org-id': args.orgId.toString(),
 			},
 		};
-		console.log( JSON.stringify( opts, null, 3 ) );
-
+		// console.log( JSON.stringify( opts, null, 3 ) );
 		const data = await new Promise((resolve, reject) => {
 			let data = '';
 			const req = https.request(opts, (res) => {
@@ -199,11 +204,9 @@ async function loadPolicy( domainCode ) {
 		file.versionId = data.fileVersionId;
 	}
 
-	console.log( JSON.stringify(file, null, 3) );
-
+	// console.log( JSON.stringify(file, null, 3) );
 	let fileVersionId = file.fileVersionId;
-
-    console.log('File version id:', fileVersionId);
+    console.log('   > File version ID:', fileVersionId);
 
     // add a batch item
 	const evidenceDefinitionId = edMap[domainCode];
@@ -352,7 +355,7 @@ async function loadControls() {
 	console.log( "Processing " + results.count + " controls" );
 	let controls_yaml = "controls:\n"
 	for await ( const control of results ) {
-		controls_yaml += " - " + control.code + "\n";
+		controls_yaml += "   - " + control.code + "\n";
 		await loadControl( control );
 	}
 	console.log( controls_yaml );
@@ -374,21 +377,28 @@ async function run() {
     await fileService.connect({
 		apiKey: args.apiKey,
 		orgId: args.orgId,
-        url: await URL.parse(`${url.toString()}file-service`),
+        url: await URL.parse(`${args.url.toString()}file-service`),
     });
 
     await platform.connect({
 		apiKey: args.apiKey,
         orgId: args.orgId,
-        url: await URL.parse(`${url.toString()}platform`),
+        url: await URL.parse(`${args.url.toString()}platform`),
     });
+
+    await events.connect({
+		apiKey: args.apiKey,
+        orgId: args.orgId,
+        url: await URL.parse(`${args.url.toString()}events`),
+    });
+
 
     await loadEvidenceDefs();
 
     await dana.connect({
 		apiKey: args.apiKey,
         orgId: args.orgId,
-        url: await URL.parse(`${url.toString()}dana/api/v1`),
+        url: await URL.parse(`${args.url.toString()}dana/api/v1`),
     });
 
 	console.log( "Connected to Auditmation platform services" );
@@ -429,9 +439,7 @@ async function run() {
 	await platform.getBatchApi().endBatch(batchId);
 
 	// end job
-    await platform.getPipelineJobApi().updatePipelineJob(jobId, {
-      status: PipelineJobStatusEnum.Completed,
-    });
+    await events.getJobApi().onComplete(jobId);
 
 
   } catch (err) {
